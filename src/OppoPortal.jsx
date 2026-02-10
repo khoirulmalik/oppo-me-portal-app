@@ -21,108 +21,119 @@ import {
   Server,
   Package,
   GitBranch,
+  Users,
+  Code,
+  Shield,
+  Terminal,
 } from "lucide-react";
 
 export default function OppoPortal() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
   const [redirectUrl, setRedirectUrl] = useState("");
+  const [redirectProgress, setRedirectProgress] = useState(0);
   const [activeTab, setActiveTab] = useState("all");
 
   useEffect(() => {
     setTimeout(() => setIsLoaded(true), 100);
   }, []);
 
+  // Progress animation for redirect
+  useEffect(() => {
+    if (redirecting) {
+      setRedirectProgress(0);
+      const interval = setInterval(() => {
+        setRedirectProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            return 100;
+          }
+          return prev + 2;
+        });
+      }, 20);
+      return () => clearInterval(interval);
+    }
+  }, [redirecting]);
+
   const categories = [
     {
       id: "production",
-      name: "Production Systems",
+      name: "SMED",
       color: "#00A651",
       icon: <Factory className="w-6 h-6" />,
       websites: [
         {
-          name: "MES Dashboard",
-          url: "https://mes.oppo-indonesia.com",
+          name: "SMED Dashboard",
+          url: "http://10.121.26.24:5173",
           desc: "Manufacturing Execution System",
           icon: <Monitor className="w-5 h-5" />,
-        },
-        {
-          name: "Production Control",
-          url: "https://production.oppo-indonesia.com",
-          desc: "Real-time Production Monitoring",
-          icon: <Activity className="w-5 h-5" />,
-        },
-        {
-          name: "Quality Gate",
-          url: "https://quality.oppo-indonesia.com",
-          desc: "Quality Assurance Portal",
-          icon: <CheckCircle className="w-5 h-5" />,
         },
       ],
     },
     {
       id: "engineering",
-      name: "Engineering Tools",
+      name: "RELIABLE",
       color: "#00A651",
       icon: <Settings className="w-6 h-6" />,
       websites: [
         {
-          name: "Process Planner",
-          url: "https://process.oppo-indonesia.com",
-          desc: "Manufacturing Process Planning",
+          name: "Sparepart App",
+          url: "http://10.121.26.50:5176",
+          desc: "Machine and spare parts inventory, and tracking",
           icon: <Settings className="w-5 h-5" />,
-        },
-        {
-          name: "Equipment Manager",
-          url: "https://equipment.oppo-indonesia.com",
-          desc: "Equipment Maintenance System",
-          icon: <Wrench className="w-5 h-5" />,
-        },
-        {
-          name: "Tooling Database",
-          url: "https://tooling.oppo-indonesia.com",
-          desc: "Tooling & Fixture Management",
-          icon: <Database className="w-5 h-5" />,
         },
       ],
     },
     {
       id: "analytics",
-      name: "Analytics Hub",
+      name: "PLATFORM",
       color: "#00A651",
       icon: <BarChart3 className="w-6 h-6" />,
       websites: [
         {
-          name: "Data Analytics",
-          url: "https://analytics.oppo-indonesia.com",
-          desc: "Manufacturing Data Insights",
+          name: "Project Controlling",
+          url: "http://10.121.26.50:5175",
+          desc: "Monitor project progress in one place",
           icon: <BarChart3 className="w-5 h-5" />,
         },
         {
-          name: "KPI Monitor",
-          url: "https://kpi.oppo-indonesia.com",
-          desc: "Key Performance Indicators",
+          name: "NPI Dashboard",
+          url: "http://10.121.26.50:5174",
+          desc: "Track new model introduction metrics and overall readiness",
           icon: <TrendingUp className="w-5 h-5" />,
         },
       ],
     },
     {
       id: "documentation",
-      name: "Documentation",
+      name: "TPM",
       color: "#00A651",
       icon: <BookOpen className="w-6 h-6" />,
+      websites: [],
+    },
+    {
+      id: "other",
+      name: "OTHER",
+      color: "#059669",
+      icon: <Code className="w-6 h-6" />,
       websites: [
         {
-          name: "SOP Library",
-          url: "https://sop.oppo-indonesia.com",
-          desc: "Standard Operating Procedures",
-          icon: <FileText className="w-5 h-5" />,
+          name: "User Management",
+          url: "http://10.121.26.50:5173",
+          desc: "Manage user accounts, roles, and permissions",
+          icon: <Users className="w-5 h-5" />,
         },
         {
-          name: "Tech Docs",
-          url: "https://docs.oppo-indonesia.com",
-          desc: "Technical Documentation Hub",
-          icon: <BookOpen className="w-5 h-5" />,
+          name: "Developer Portal",
+          url: "http://10.121.26.50:3000/dev",
+          desc: "API documentation, testing tools, and developer resources",
+          icon: <Terminal className="w-5 h-5" />,
+        },
+        {
+          name: "System Admin",
+          url: "http://10.121.26.50:9000/admin",
+          desc: "System configuration and administrative tools",
+          icon: <Shield className="w-5 h-5" />,
         },
       ],
     },
@@ -131,13 +142,16 @@ export default function OppoPortal() {
   const handleRedirect = (url) => {
     setRedirectUrl(url);
     setRedirecting(true);
+
+    // Open in new tab immediately
+    const newWindow = window.open(url, "_blank");
+
+    // Reset animation after completion
     setTimeout(() => {
-      window.open(url, "_blank");
-      setTimeout(() => {
-        setRedirecting(false);
-        setRedirectUrl("");
-      }, 500);
-    }, 1500);
+      setRedirecting(false);
+      setRedirectUrl("");
+      setRedirectProgress(0);
+    }, 1200);
   };
 
   const filteredCategories =
@@ -199,213 +213,77 @@ export default function OppoPortal() {
         </div>
       </div>
 
-      {/* Redirect Overlay */}
+      {/* Improved Redirect Overlay */}
       {redirecting && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-emerald-50">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-32 h-32 border-4 border-green-200 rounded-full animate-ping opacity-75"></div>
-              <div className="absolute w-24 h-24 border-4 border-green-300 rounded-full animate-pulse"></div>
-            </div>
-
-            <div className="relative text-center space-y-6 p-8">
-              <div className="relative w-24 h-24 mx-auto">
-                <div className="absolute inset-0 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full animate-pulse opacity-20"></div>
-                <div className="absolute inset-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-2xl">
-                  <Zap className="w-12 h-12 text-white animate-bounce" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-100">
+            <div className="text-center space-y-6">
+              {/* Animated Icon */}
+              <div className="relative w-20 h-20 mx-auto">
+                <div className="absolute inset-0 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full animate-pulse opacity-30"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg">
+                  <ExternalLink className="w-10 h-10 text-white" />
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <h3 className="text-2xl font-bold text-gray-900 animate-pulse">
+              {/* Title */}
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold text-gray-900">
                   Opening System
                 </h3>
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce"></div>
-                  <div
-                    className="w-2 h-2 bg-green-500 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.2s" }}
-                  ></div>
-                  <div
-                    className="w-2 h-2 bg-green-500 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.4s" }}
-                  ></div>
-                </div>
-                <div className="bg-white rounded-lg px-6 py-3 shadow-lg max-w-md mx-auto border border-gray-200">
-                  <p className="text-sm text-gray-600 font-mono truncate">
-                    {redirectUrl}
-                  </p>
-                </div>
+                <p className="text-sm text-gray-600 truncate px-4">
+                  {redirectUrl}
+                </p>
               </div>
+
+              {/* Progress Bar */}
+              <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-green-500 to-emerald-600 transition-all duration-300 ease-out"
+                  style={{ width: `${redirectProgress}%` }}
+                ></div>
+              </div>
+
+              {/* Status Text */}
+              <p className="text-xs text-gray-500">
+                {redirectProgress < 100 ? "Please wait..." : "Opening in new tab"}
+              </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Hero Section with Blend */}
-      <div className="relative bg-gradient-to-br from-green-600 via-green-700 to-emerald-800 overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-              backgroundSize: "32px 32px",
-            }}
-          ></div>
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-green-50 via-emerald-50 to-green-100">
+        {/* Animated Background Icons */}
+        <div className="absolute inset-0 overflow-hidden opacity-10">
+          {floatingIcons.map((item, idx) => {
+            const Icon = item.Icon;
+            const positions = [
+              "top-10 left-10",
+              "top-20 right-20",
+              "bottom-20 left-1/4",
+              "bottom-10 right-1/3",
+              "top-1/3 left-1/2",
+              "bottom-1/4 right-10",
+              "top-1/2 left-10",
+              "bottom-1/3 right-1/4",
+            ];
+            return (
+              <div
+                key={idx}
+                className={`absolute ${positions[idx]} text-green-600`}
+                style={{
+                  animation: `floatIcon ${item.duration} ease-in-out infinite`,
+                  animationDelay: item.delay,
+                }}
+              >
+                <Icon className="w-12 h-12" />
+              </div>
+            );
+          })}
         </div>
 
-        <div className="container mx-auto px-6 py-16 md:py-24 relative z-10">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            {/* Left Side - Welcome Content */}
-            <div
-              className={`text-white transition-all duration-1000 transform ${
-                isLoaded
-                  ? "opacity-100 translate-x-0"
-                  : "opacity-0 -translate-x-12"
-              }`}
-            >
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6 border border-white/20">
-                <Sparkles className="w-4 h-4 text-green-200" />
-                <span className="text-sm font-semibold text-green-100">
-                  Welcome to Engineering Portal
-                </span>
-              </div>
-
-              {/* Main Heading */}
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                Manufacturing
-                <span className="block text-green-200 mt-2">
-                  Engineering Hub
-                </span>
-              </h1>
-
-              {/* Description */}
-              <p className="text-lg text-green-100 mb-8 leading-relaxed">
-                Your unified gateway to all manufacturing systems, engineering
-                tools, analytics platforms, and technical documentation.
-              </p>
-
-              {/* Stats Grid */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-3xl font-bold text-white mb-1">
-                    {totalSystems}
-                  </div>
-                  <div className="text-sm text-green-200">Active Systems</div>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-3xl font-bold text-white mb-1">
-                    {categories.length}
-                  </div>
-                  <div className="text-sm text-green-200">Categories</div>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-3xl font-bold text-white mb-1">24/7</div>
-                  <div className="text-sm text-green-200">Availability</div>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-3xl font-bold text-white mb-1">100%</div>
-                  <div className="text-sm text-green-200">Uptime</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Side - Animated Icons */}
-            <div
-              className={`relative h-[400px] md:h-[500px] transition-all duration-1000 transform ${
-                isLoaded
-                  ? "opacity-100 translate-x-0"
-                  : "opacity-0 translate-x-12"
-              }`}
-            >
-              {/* Center Glow */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-48 h-48 bg-green-400/30 rounded-full blur-3xl animate-pulse"></div>
-              </div>
-
-              {/* Floating Icons */}
-              {floatingIcons.map(({ Icon, delay, duration }, index) => {
-                const positions = [
-                  { top: "10%", left: "20%" },
-                  { top: "25%", right: "15%" },
-                  { top: "50%", left: "10%" },
-                  { top: "60%", right: "25%" },
-                  { top: "75%", left: "30%" },
-                  { top: "15%", left: "50%" },
-                  { top: "70%", right: "10%" },
-                  { top: "40%", left: "45%" },
-                ];
-
-                return (
-                  <div
-                    key={index}
-                    className="absolute"
-                    style={{
-                      ...positions[index],
-                      animation: `floatIcon ${duration} ease-in-out infinite`,
-                      animationDelay: delay,
-                    }}
-                  >
-                    <div className="relative group">
-                      {/* Glow Effect */}
-                      <div className="absolute inset-0 bg-white/20 rounded-2xl blur-xl group-hover:bg-white/30 transition-all duration-300"></div>
-
-                      {/* Icon Container */}
-                      <div className="relative bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 group-hover:scale-110 group-hover:bg-white/20 transition-all duration-300">
-                        <Icon className="w-8 h-8 text-white" />
-                      </div>
-
-                      {/* Connecting Lines */}
-                      <div
-                        className="absolute top-1/2 left-1/2 w-1 h-12 bg-gradient-to-b from-white/20 to-transparent"
-                        style={{
-                          transform: "translate(-50%, -50%) rotate(45deg)",
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-                );
-              })}
-
-              {/* Center Icon */}
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-white/30 rounded-full blur-2xl animate-pulse"></div>
-                  <div className="relative bg-white/20 backdrop-blur-md p-8 rounded-full border-4 border-white/30">
-                    <Zap className="w-16 h-16 text-white animate-pulse" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Wave Blend Transition */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg
-            viewBox="0 0 1440 120"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-full"
-          >
-            <path
-              d="M0 0L60 10C120 20 240 40 360 46.7C480 53 600 47 720 43.3C840 40 960 40 1080 46.7C1200 53 1320 67 1380 73.3L1440 80V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0V0Z"
-              fill="url(#gradient1)"
-            />
-            <defs>
-              <linearGradient id="gradient1" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#F9FAFB" />
-                <stop offset="100%" stopColor="#E0F2E9" />
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
-      </div>
-
-      {/* Main Content Section - INVERTED GRADIENT */}
-      <div className="relative bg-gradient-to-tl from-gray-50 via-green-50 to-emerald-100 overflow-hidden">
         {/* Inverted Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <div
@@ -417,42 +295,97 @@ export default function OppoPortal() {
           ></div>
         </div>
 
-        {/* Floating Shapes - Reversed Position */}
+        {/* Floating Shapes */}
         <div className="absolute bottom-20 left-20 w-64 h-64 bg-green-200/20 rounded-full blur-3xl animate-pulse"></div>
         <div
           className="absolute top-20 right-20 w-96 h-96 bg-emerald-200/20 rounded-full blur-3xl animate-pulse"
           style={{ animationDelay: "1s" }}
         ></div>
 
+        {/* Hero Content */}
+        <div className="container mx-auto px-6 py-16 relative z-10">
+          <div
+            className={`text-center mb-12 transition-all duration-700 ${isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+              }`}
+          >
+            <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium text-green-700 mb-4 border border-green-200 shadow-sm">
+              <Sparkles className="w-4 h-4" />
+              <span>{totalSystems} Systems Available</span>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Engineering Portal
+            </h1>
+            <p className="text-lg text-gray-700 max-w-2xl mx-auto">
+              Access all manufacturing engineering systems and tools in one
+              place
+            </p>
+          </div>
+
+          {/* Stats Cards */}
+          <div
+            className={`grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-12 transition-all duration-700 ${isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+              }`}
+            style={{ transitionDelay: "100ms" }}
+          >
+            {categories.map((cat, idx) => (
+              <div
+                key={cat.id}
+                className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-green-200 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 rounded-lg bg-green-50" style={{ color: cat.color }}>
+                    {cat.icon}
+                  </div>
+                </div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {cat.websites.length}
+                </div>
+                <div className="text-xs text-gray-600">{cat.name}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="relative bg-gradient-to-br from-gray-50 via-white to-green-50/30 min-h-screen">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `radial-gradient(circle at 2px 2px, #00A651 1px, transparent 0)`,
+              backgroundSize: "32px 32px",
+            }}
+          ></div>
+        </div>
+
         <div className="container mx-auto px-6 py-12 relative z-10">
           {/* Tabs Navigation */}
           <div
-            className={`mb-8 transition-all duration-700 ${
-              isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-            }`}
+            className={`mb-8 transition-all duration-700 ${isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+              }`}
             style={{ transitionDelay: "200ms" }}
           >
             <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-green-200 p-2 inline-flex gap-2 shadow-md overflow-x-auto">
               <button
                 onClick={() => setActiveTab("all")}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 whitespace-nowrap ${
-                  activeTab === "all"
-                    ? "bg-green-600 text-white shadow-md scale-105"
-                    : "text-gray-700 hover:bg-green-50"
-                }`}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 whitespace-nowrap ${activeTab === "all"
+                  ? "bg-green-600 text-white shadow-md scale-105"
+                  : "text-gray-700 hover:bg-green-50"
+                  }`}
               >
                 <LayoutGrid className="w-4 h-4" />
-                All Systems
+                All Apps
               </button>
               {categories.map((category) => (
                 <button
                   key={category.id}
                   onClick={() => setActiveTab(category.id)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 whitespace-nowrap ${
-                    activeTab === category.id
-                      ? "bg-green-600 text-white shadow-md scale-105"
-                      : "text-gray-700 hover:bg-green-50"
-                  }`}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 whitespace-nowrap ${activeTab === category.id
+                    ? "bg-green-600 text-white shadow-md scale-105"
+                    : "text-gray-700 hover:bg-green-50"
+                    }`}
                 >
                   <span className="w-4 h-4">{category.icon}</span>
                   {category.name}
@@ -466,11 +399,10 @@ export default function OppoPortal() {
             {filteredCategories.map((category, catIndex) => (
               <div
                 key={category.id}
-                className={`transition-all duration-700 ${
-                  isLoaded
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-4"
-                }`}
+                className={`transition-all duration-700 ${isLoaded
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4"
+                  }`}
                 style={{ transitionDelay: `${catIndex * 100 + 300}ms` }}
               >
                 {/* Category Card */}
@@ -498,45 +430,52 @@ export default function OppoPortal() {
 
                   {/* Systems List */}
                   <div className="divide-y divide-green-100">
-                    {category.websites.map((website) => (
-                      <button
-                        key={website.name}
-                        onClick={() => handleRedirect(website.url)}
-                        className="w-full text-left px-6 py-4 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-all duration-300 group"
-                      >
-                        <div className="flex items-center gap-4">
-                          {/* Icon */}
-                          <div
-                            className="p-2.5 rounded-lg bg-green-50 group-hover:bg-white border border-green-200 group-hover:border-green-400 transition-all duration-300 group-hover:scale-110"
-                            style={{ color: category.color }}
-                          >
-                            {website.icon}
-                          </div>
-
-                          {/* Content */}
-                          <div className="flex-grow min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="text-base font-semibold text-gray-900 group-hover:text-green-700 transition-colors">
-                                {website.name}
-                              </h3>
+                    {category.websites.length > 0 ? (
+                      category.websites.map((website) => (
+                        <button
+                          key={website.name}
+                          onClick={() => handleRedirect(website.url)}
+                          className="w-full text-left px-6 py-4 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-all duration-300 group"
+                        >
+                          <div className="flex items-center gap-4">
+                            {/* Icon */}
+                            <div
+                              className="p-2.5 rounded-lg bg-green-50 group-hover:bg-white border border-green-200 group-hover:border-green-400 transition-all duration-300 group-hover:scale-110"
+                              style={{ color: category.color }}
+                            >
+                              {website.icon}
                             </div>
-                            <p className="text-sm text-gray-600 group-hover:text-gray-700 transition-colors">
-                              {website.desc}
-                            </p>
-                            <p className="text-xs text-gray-400 mt-1 font-mono truncate group-hover:text-green-600 transition-colors">
-                              {website.url}
-                            </p>
-                          </div>
 
-                          {/* Arrow */}
-                          <div className="flex-shrink-0">
-                            <div className="w-10 h-10 rounded-full bg-green-100 group-hover:bg-green-600 flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg">
-                              <ChevronRight className="w-5 h-5 text-gray-600 group-hover:text-white transition-all duration-300 group-hover:translate-x-0.5" />
+                            {/* Content */}
+                            <div className="flex-grow min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="text-base font-semibold text-gray-900 group-hover:text-green-700 transition-colors">
+                                  {website.name}
+                                </h3>
+                              </div>
+                              <p className="text-sm text-gray-600 group-hover:text-gray-700 transition-colors">
+                                {website.desc}
+                              </p>
+                              <p className="text-xs text-gray-400 mt-1 font-mono truncate group-hover:text-green-600 transition-colors">
+                                {website.url}
+                              </p>
+                            </div>
+
+                            {/* Arrow */}
+                            <div className="flex-shrink-0">
+                              <div className="w-10 h-10 rounded-full bg-green-100 group-hover:bg-green-600 flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg">
+                                <ChevronRight className="w-5 h-5 text-gray-600 group-hover:text-white transition-all duration-300 group-hover:translate-x-0.5" />
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </button>
-                    ))}
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-6 py-8 text-center text-gray-500">
+                        <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">Coming soon</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -560,9 +499,8 @@ export default function OppoPortal() {
 
           {/* Footer */}
           <footer
-            className={`mt-16 pt-8 border-t border-green-200 transition-all duration-700 ${
-              isLoaded ? "opacity-100" : "opacity-0"
-            }`}
+            className={`mt-16 pt-8 border-t border-green-200 transition-all duration-700 ${isLoaded ? "opacity-100" : "opacity-0"
+              }`}
             style={{ transitionDelay: "500ms" }}
           >
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-600">
@@ -578,7 +516,7 @@ export default function OppoPortal() {
           </footer>
         </div>
 
-        {/* Bottom Wave Blend (Optional) */}
+        {/* Bottom Wave Blend */}
         <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
           <svg
             viewBox="0 0 1440 60"
